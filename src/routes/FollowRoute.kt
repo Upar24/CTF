@@ -22,18 +22,18 @@ fun Route.followRoute(){
                     call.respond(BadRequest)
                     return@get
                 }
-//                val isFollowing = isFollowingUser(request.idUser, request.email)
-//                if(isFollowing){
-//                    call.respond(OK,SimpleResponse(true,"unfollow?"))
-//                }else{
-//                    call.respond(OK,SimpleResponse(false,"follow?"))
-//                }
-//            }
-//        }
-//        authenticate {
-//            post {
-//                val request = try {
-//                    call.receive<FollowRequest>()
+                val isFollowing = isFollowingUser(request.idUser, request.email)
+                if(isFollowing){
+                    call.respond(OK,SimpleResponse(true,"unfollow?"))
+                }else{
+                    call.respond(OK,SimpleResponse(false,"follow?"))
+                }
+            }
+        }
+        authenticate {
+            post {
+                val request = try {
+                    call.receive<FollowRequest>()
                 }catch (e:ContentTransformationException){
                     call.respond(BadRequest)
                     return@post
