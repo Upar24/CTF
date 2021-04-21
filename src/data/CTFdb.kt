@@ -4,6 +4,7 @@ import com.project.data.collections.User
 import org.litote.kmongo.coroutine.coroutine
 import org.litote.kmongo.eq
 import org.litote.kmongo.reactivestreams.KMongo
+import org.litote.kmongo.setValue
 
 private val client = KMongo.createClient().coroutine
 private val db = client.getDatabase("CTFDb")
@@ -19,3 +20,44 @@ suspend fun checkPasswordForEmail(email:String, passwordToCheck:String):Boolean{
     val actualPassword = users.findOne(User::email eq email)?.password ?: return false
     return actualPassword==passwordToCheck
 }
+suspend fun isFollowingUser(idUser:String, email:String): Boolean{
+    val user = users.findOne(User::email eq idUser) ?: return false
+    return email in user.followers
+}
+suspend fun toggleFollowUser(idUser: String, email: String) : String {
+    val isFollowing = isFollowingUser(idUser, email)
+    if (isFollowing) {
+        val newFollowers = users.findOne(User::email eq idUser)!!.followers - email
+        users.updateOne(User::email eq idUser, setValue(User::followers, newFollowers))
+        return "unfollowing"
+    } else {
+        val newFollowers = users.findOne(User::email eq idUser)!!.followers + email
+        users.updateOne(User::email eq idUser, setValue(User::followers, newFollowers))
+        return "following"
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

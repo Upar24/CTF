@@ -1,5 +1,7 @@
 package com.project
 
+import com.project.data.checkPasswordForEmail
+import com.project.routes.followRoute
 import com.project.routes.loginRoute
 import com.project.routes.registerRoute
 import io.ktor.application.*
@@ -23,26 +25,27 @@ fun Application.module(testing: Boolean = false) {
         }
     }
     install(Authentication){
-//        configureAuth()
+        configureAuth()
     }
     install (Routing){
         registerRoute()
         loginRoute()
+        followRoute()
     }
 }
-//private fun Authentication.Configuration.configureAuth(){
-//    basic{
-//        realm = "CTF Server"
-//        validate { crudentials ->
-//            val email = crudentials.name
-//            val password = crudentials.password
-////            if(checkPasswordForEmail(email,password)){
-//                UserIdPrincipal(email)
-////            }else null
-////        }
-//    }
-//}
+private fun Authentication.Configuration.configureAuth(){
+    basic{
+        realm = "CTF Server"
+        validate { crudentials ->
+            val email = crudentials.name
+            val password = crudentials.password
+            if(checkPasswordForEmail(email,password)){
+                UserIdPrincipal(email)
+            }else null
+        }
+    }
+}
 
 
-//}
+
 
