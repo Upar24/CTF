@@ -1,6 +1,8 @@
 package com.project.data
 
+import com.project.data.collections.Pesta
 import com.project.data.collections.User
+import com.project.data.requests.PestaRequest
 import org.litote.kmongo.coroutine.coroutine
 import org.litote.kmongo.eq
 import org.litote.kmongo.reactivestreams.KMongo
@@ -9,6 +11,7 @@ import org.litote.kmongo.setValue
 private val client = KMongo.createClient().coroutine
 private val db = client.getDatabase("CTFDb")
 private val users = db.getCollection<User>()
+private val pestas = db.getCollection<Pesta>()
 
 suspend fun registerUser(user: User) : Boolean{
     return users.insertOne(user).wasAcknowledged()
@@ -36,13 +39,17 @@ suspend fun toggleFollowUser(idUser: String, email: String) : String {
         return "following"
     }
 }
-
-
-
-
-
-
-
+suspend fun savePesta(pesta: Pesta):Boolean{
+    val pestaExist = pestas.findOneById(pesta._id) != null
+    return if(pestaExist){
+        pestas.updateOneById(pesta._id,pesta).wasAcknowledged()
+    }else{
+        pestas.insertOne(pesta).wasAcknowledged()
+    }
+}
+suspend fun getPesta(group:String):List<Pesta>{
+    return pestas.find(Pesta::group eq group).toList()
+}
 
 
 
