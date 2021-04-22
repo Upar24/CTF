@@ -50,7 +50,7 @@ fun Route.pestaRoute(){
                     call.respond(BadRequest)
                     return@get
                 }
-                val pesta = getPotdPPotd(potdPpotd.idPesta)
+                val pesta = getPotdPPotd(potdPpotd.status)
                 call.respond(OK,pesta)
             }
         }
