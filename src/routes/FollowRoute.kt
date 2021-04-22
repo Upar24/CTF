@@ -29,8 +29,6 @@ fun Route.followRoute(){
                     call.respond(OK,SimpleResponse(false,"follow?"))
                 }
             }
-        }
-        authenticate {
             post {
                 val request = try {
                     call.receive<FollowRequest>()
@@ -42,6 +40,5 @@ fun Route.followRoute(){
                 call.respond(OK,SimpleResponse(true, string))
             }
         }
-
     }
 }

@@ -50,7 +50,9 @@ suspend fun savePesta(pesta: Pesta):Boolean{
 suspend fun getPesta(group:String):List<Pesta>{
     return pestas.find(Pesta::group eq group).toList()
 }
-
+suspend fun getPotdPPotd(idPesta : String): Pesta {
+    return pestas.findOne(Pesta::_id eq idPesta)!!
+}
 
 
 
