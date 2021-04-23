@@ -1,9 +1,8 @@
 package com.project.data
 
 import com.project.data.collections.Pesta
+import com.project.data.collections.Sudah
 import com.project.data.collections.User
-import com.project.data.requests.ListPotdPpotd
-import com.project.data.requests.PestaRequest
 import org.litote.kmongo.coroutine.coroutine
 import org.litote.kmongo.eq
 import org.litote.kmongo.reactivestreams.KMongo
@@ -13,6 +12,7 @@ private val client = KMongo.createClient().coroutine
 private val db = client.getDatabase("CTFDb")
 private val users = db.getCollection<User>()
 private val pestas = db.getCollection<Pesta>()
+private val sudahs = db.getCollection<Sudah>()
 
 suspend fun registerUser(user: User) : Boolean{
     return users.insertOne(user).wasAcknowledged()
@@ -54,7 +54,8 @@ suspend fun getPesta(group:String):List<Pesta>{
 suspend fun getPotdPPotd(status : String): Pesta {
     return pestas.findOne(Pesta::status eq status)!!
 }
-suspend fun getSudah():List<Pesta>{
+suspend fun getSudahs(status: String): List<Sudah> {
+    return sudahs.find(Sudah::status eq status).toList()
 }
 
 

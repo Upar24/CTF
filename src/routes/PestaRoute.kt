@@ -5,7 +5,6 @@ import com.project.data.collections.Pesta
 import com.project.data.reponses.SimpleResponse
 import com.project.data.requests.GetPestas
 import com.project.data.requests.GetPotdPPotd
-import com.project.data.requests.ListPotdPpotd
 import com.project.data.requests.PestaRequest
 import io.ktor.application.*
 import io.ktor.auth.*
@@ -53,12 +52,12 @@ fun Route.pestaRoute(){
             }
             post {
                 val listPotdPpotd = try {
-                    call.receive<ListPotdPpotd>()
+                    call.receive<GetPotdPPotd>()
                 }catch (e:ContentTransformationException){
                     call.respond(BadRequest)
                     return@post
                 }
-                val pesta =  x(listPotdPpotd.status)
+                val pesta =  getSudahs(listPotdPpotd.status)
                 call.respond(OK,pesta)
             }
     }
