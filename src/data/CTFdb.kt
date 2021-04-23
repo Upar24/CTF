@@ -2,6 +2,7 @@ package com.project.data
 
 import com.project.data.collections.Pesta
 import com.project.data.collections.User
+import com.project.data.requests.ListPotdPpotd
 import com.project.data.requests.PestaRequest
 import org.litote.kmongo.coroutine.coroutine
 import org.litote.kmongo.eq
@@ -52,6 +53,8 @@ suspend fun getPesta(group:String):List<Pesta>{
 }
 suspend fun getPotdPPotd(status : String): Pesta {
     return pestas.findOne(Pesta::status eq status)!!
+}
+suspend fun getSudah():List<Pesta>{
 }
 
 

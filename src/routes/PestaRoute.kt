@@ -1,13 +1,12 @@
 package com.project.routes
 
+import com.project.data.*
 import com.project.data.collections.Pesta
-import com.project.data.getPesta
-import com.project.data.getPotdPPotd
 import com.project.data.reponses.SimpleResponse
 import com.project.data.requests.GetPestas
 import com.project.data.requests.GetPotdPPotd
+import com.project.data.requests.ListPotdPpotd
 import com.project.data.requests.PestaRequest
-import com.project.data.savePesta
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.http.HttpStatusCode.Companion.BadRequest
@@ -42,8 +41,7 @@ fun Route.pestaRoute(){
         }
     }
     route("/potdppotd"){
-        authenticate {
-            get {
+            get{
                 val potdPpotd = try {
                     call.receive<GetPotdPPotd>()
                 }catch (e:ContentTransformationException){
@@ -53,7 +51,16 @@ fun Route.pestaRoute(){
                 val pesta = getPotdPPotd(potdPpotd.status)
                 call.respond(OK,pesta)
             }
-        }
+            post {
+                val listPotdPpotd = try {
+                    call.receive<ListPotdPpotd>()
+                }catch (e:ContentTransformationException){
+                    call.respond(BadRequest)
+                    return@post
+                }
+                val pesta =  x(listPotdPpotd.status)
+                call.respond(OK,pesta)
+            }
     }
 }
 
