@@ -4,7 +4,7 @@ package com.project.data.collections
 
 data class Post(
     val _id : String="",
-    val idUser:String,
+    val email:String,
     val date : Long,
     val text : String,
     val type : String,

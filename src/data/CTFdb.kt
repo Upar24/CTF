@@ -59,17 +59,12 @@ suspend fun getPot(status : String): Pesta {
 suspend fun getSudahs(status: String): List<Sudah> {
     return sudahs.find(Sudah::status eq status).toList()
 }
-//suspend fun getIdUser(email: String):String{
-//    val idUser = users.findOne(User::email eq email)?._id.toString()
-//    return idUser
-//}
+
 suspend fun savePost(post: Post) : Boolean{
-//    val postExists = posts.findOneById(post._id) != null
-//    return if(postExists){
-//        posts.updateOneById(post._id,post).wasAcknowledged()
-//    }else{
         return posts.insertOne(post).wasAcknowledged()
-//    }
+}
+suspend fun getPostForUser(email : String): List<Post>{
+    return posts.find(Post::email eq email).toList()
 }
 
 
