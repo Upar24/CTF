@@ -1,5 +1,5 @@
 package com.project.data.requests
 
-data class GetPotdPPotd(
+data class PotRequest(
     val status : String
 )

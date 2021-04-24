@@ -4,7 +4,7 @@ import com.project.data.*
 import com.project.data.collections.Pesta
 import com.project.data.reponses.SimpleResponse
 import com.project.data.requests.GetPestas
-import com.project.data.requests.GetPotdPPotd
+import com.project.data.requests.PotRequest
 import com.project.data.requests.PestaRequest
 import io.ktor.application.*
 import io.ktor.auth.*
@@ -41,18 +41,18 @@ fun Route.pestaRoute(){
     }
     route("/potdppotd"){
             get{
-                val potdPpotd = try {
-                    call.receive<GetPotdPPotd>()
+                val pot = try {
+                    call.receive<PotRequest>()
                 }catch (e:ContentTransformationException){
                     call.respond(BadRequest)
                     return@get
                 }
-                val pesta = getPotdPPotd(potdPpotd.status)
+                val pesta = getPot(pot.status)
                 call.respond(OK,pesta)
             }
             post {
                 val listPotdPpotd = try {
-                    call.receive<GetPotdPPotd>()
+                    call.receive<PotRequest>()
                 }catch (e:ContentTransformationException){
                     call.respond(BadRequest)
                     return@post

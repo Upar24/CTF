@@ -1,10 +1,7 @@
 package com.project
 
 import com.project.data.checkPasswordForEmail
-import com.project.routes.followRoute
-import com.project.routes.loginRoute
-import com.project.routes.pestaRoute
-import com.project.routes.registerRoute
+import com.project.routes.*
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.features.*
@@ -33,6 +30,7 @@ fun Application.module(testing: Boolean = false) {
         loginRoute()
         followRoute()
         pestaRoute()
+        postRoute()
     }
 }
 private fun Authentication.Configuration.configureAuth(){

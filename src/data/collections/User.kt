@@ -9,5 +9,5 @@ data class User(
     val username : String = "",
     val followers : List<String> = listOf(),
     @BsonId
-    val idUser : String = ObjectId().toString()
+    val _id : String = ObjectId().toString()
 )
