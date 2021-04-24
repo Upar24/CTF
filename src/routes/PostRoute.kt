@@ -1,11 +1,12 @@
 package com.project.routes
 
-import com.project.data.checkIfPostExist
 import com.project.data.collections.Post
 import com.project.data.reponses.SimpleResponse
+import com.project.data.requests.PostRequest
 import com.project.data.savePost
 import io.ktor.application.*
 import io.ktor.auth.*
+import io.ktor.http.HttpStatusCode.Companion.Conflict
 import io.ktor.http.HttpStatusCode.Companion.OK
 import io.ktor.request.*
 import io.ktor.response.*
@@ -16,21 +17,17 @@ fun Route.postRoute() {
         authenticate {
             post {
                 val post = try {
-                    call.receive<Post>()
+                    call.receive<PostRequest>()
                 }catch (e : ContentTransformationException){
                     call.respond(OK,SimpleResponse(false,"post is not uploading"))
                     return@post
                 }
-                val postExits = checkIfPostExist(post._id)
-                if(!postExits){
-                    if(savePost(post)){
-                        call.respond(OK,SimpleResponse(true,"successfully posting"))
-                    }else{
-                        call.respond(OK,SimpleResponse(false,"unknown error occured"))
-                    }
+                if(savePost(Post(post.id,post.idUser,post.date,post.text,post.type))){
+                    call.respond(OK)
                 }else{
-                    call.respond(OK,SimpleResponse(false,"cannt edit, add new post"))
+                    call.respond(Conflict)
                 }
+
             }
         }
     }

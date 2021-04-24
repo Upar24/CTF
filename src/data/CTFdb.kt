@@ -64,10 +64,12 @@ suspend fun getSudahs(status: String): List<Sudah> {
 //    return idUser
 //}
 suspend fun savePost(post: Post) : Boolean{
-    return posts.insertOne(post).wasAcknowledged()
-}
-suspend fun checkIfPostExist(_idPost:String):Boolean{
-    return posts.findOne(Post::_id eq _idPost) != null
+//    val postExists = posts.findOneById(post._id) != null
+//    return if(postExists){
+//        posts.updateOneById(post._id,post).wasAcknowledged()
+//    }else{
+        return posts.insertOne(post).wasAcknowledged()
+//    }
 }
 
 
