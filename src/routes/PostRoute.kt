@@ -29,7 +29,7 @@ fun Route.postRoute() {
                         call.respond(OK,SimpleResponse(false,"unknown error occured"))
                     }
                 }else{
-                    call.respond(OK,SimpleResponse(false,"cannt edit post"))
+                    call.respond(OK,SimpleResponse(false,"cannt edit, add new post"))
                 }
             }
         }

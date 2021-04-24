@@ -39,7 +39,7 @@ fun Route.pestaRoute(){
             }
         }
     }
-    route("/potdppotd"){
+    route("/pot"){
             get{
                 val pot = try {
                     call.receive<PotRequest>()
