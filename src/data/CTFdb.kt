@@ -1,13 +1,12 @@
 package com.project.data
 
-import com.project.data.collections.Pesta
-import com.project.data.collections.Post
-import com.project.data.collections.Sudah
-import com.project.data.collections.User
+import com.project.data.collections.*
+import io.ktor.application.*
+import io.ktor.auth.*
+import org.litote.kmongo.*
+import org.litote.kmongo.coroutine.aggregate
 import org.litote.kmongo.coroutine.coroutine
-import org.litote.kmongo.eq
 import org.litote.kmongo.reactivestreams.KMongo
-import org.litote.kmongo.setValue
 
 private val client = KMongo.createClient().coroutine
 private val db = client.getDatabase("CTFDb")
@@ -15,6 +14,7 @@ private val users = db.getCollection<User>("user")
 private val pestas = db.getCollection<Pesta>("pesta")
 private val sudahs = db.getCollection<Sudah>("sudah")
 private val posts = db.getCollection<Post>("post")
+private val tradings = db.getCollection<Trading>("trading")
 
 suspend fun registerUser(user: User) : Boolean{
     return users.insertOne(user).wasAcknowledged()
@@ -43,12 +43,12 @@ suspend fun toggleFollowUser(idUser: String, email: String) : String {
     }
 }
 suspend fun savePesta(pesta: Pesta):Boolean{
-    val pestaExist = pestas.findOneById(pesta._id) != null
-    return if(pestaExist){
-        pestas.updateOneById(pesta._id,pesta).wasAcknowledged()
-    }else{
-        pestas.insertOne(pesta).wasAcknowledged()
-    }
+//    val pestaExist = pestas.findOneById(pesta._id) != null
+//    return if(pestaExist){
+//        pestas.updateOneById(pesta._id,pesta).wasAcknowledged()
+//    }else{
+        return pestas.insertOne(pesta).wasAcknowledged()
+//    }
 }
 suspend fun getPesta(group:String):List<Pesta>{
     return pestas.find(Pesta::group eq group).toList()
@@ -59,15 +59,36 @@ suspend fun getPot(status : String): Pesta {
 suspend fun getSudahs(status: String): List<Sudah> {
     return sudahs.find(Sudah::status eq status).toList()
 }
-
 suspend fun savePost(post: Post) : Boolean{
         return posts.insertOne(post).wasAcknowledged()
 }
 suspend fun getPostForUser(email : String): List<Post>{
     return posts.find(Post::email eq email).toList()
 }
-
-
+suspend fun getPostFollowing(email: String): List<Post>? {
+    val followings = users.findOne(User::email eq email)?.followers ?: return null
+    return posts.find(Post::email `in` followings).toList()
+}
+suspend fun deletePost(idPost : String):Boolean{
+    val post = posts.findOne(Post::_id eq idPost) ?: return false
+    return posts.deleteOneById(post._id).wasAcknowledged()
+}
+suspend fun saveTrading(trading: Trading):Boolean{
+    return tradings.insertOne(trading).wasAcknowledged()
+}
+suspend fun getTrading(query : String):List<Trading>{
+    return tradings.find(or(Trading::selling eq query,Trading::buying eq query)).toList()
+}
+suspend fun getBuying(query: String):List<Trading>{
+    return tradings.find(Trading::buying eq query).toList()
+}
+suspend fun getSelling(query: String):List<Trading>{
+    return tradings.find(Trading::selling eq query).sort(descending(Trading::date)).toList()
+}
+suspend fun deleteTrading(idTrading : String):Boolean{
+    val trading = tradings.findOne(Trading::_id eq idTrading) ?: return false
+    return tradings.deleteOneById(trading._id).wasAcknowledged()
+}
 
 
 

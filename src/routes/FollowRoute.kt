@@ -33,7 +33,7 @@ fun Route.followRoute(){
                 val request = try {
                     call.receive<FollowRequest>()
                 }catch (e:ContentTransformationException){
-                    call.respond(BadRequest)
+                    call.   respond(BadRequest)
                     return@post
                 }
                 val string = toggleFollowUser(request.idUser, request.email)
