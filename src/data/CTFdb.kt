@@ -1,10 +1,7 @@
 package com.project.data
 
 import com.project.data.collections.*
-import io.ktor.application.*
-import io.ktor.auth.*
 import org.litote.kmongo.*
-import org.litote.kmongo.coroutine.aggregate
 import org.litote.kmongo.coroutine.coroutine
 import org.litote.kmongo.reactivestreams.KMongo
 
@@ -15,6 +12,7 @@ private val pestas = db.getCollection<Pesta>("pesta")
 private val sudahs = db.getCollection<Sudah>("sudah")
 private val posts = db.getCollection<Post>("post")
 private val tradings = db.getCollection<Trading>("trading")
+private val commentPosts = db.getCollection<CommentPost>("commentPost")
 
 suspend fun registerUser(user: User) : Boolean{
     return users.insertOne(user).wasAcknowledged()
@@ -28,17 +26,17 @@ suspend fun checkPasswordForEmail(email:String, passwordToCheck:String):Boolean{
 }
 suspend fun isFollowingUser(idUser:String, email:String): Boolean{
     val user = users.findOne(User::email eq idUser) ?: return false
-    return email in user.followers
+    return email in user.followings
 }
 suspend fun toggleFollowUser(idUser: String, email: String) : String {
     val isFollowing = isFollowingUser(idUser, email)
     if (isFollowing) {
-        val newFollowers = users.findOne(User::email eq idUser)!!.followers - email
-        users.updateOne(User::email eq idUser, setValue(User::followers, newFollowers))
+        val newFollowings = users.findOne(User::email eq idUser)!!.followings - email
+        users.updateOne(User::email eq idUser, setValue(User::followings, newFollowings))
         return "unfollowing"
     } else {
-        val newFollowers = users.findOne(User::email eq idUser)!!.followers + email
-        users.updateOne(User::email eq idUser, setValue(User::followers, newFollowers))
+        val newFollowoings = users.findOne(User::email eq idUser)!!.followings + email
+        users.updateOne(User::email eq idUser, setValue(User::followings, newFollowoings))
         return "following"
     }
 }
@@ -66,7 +64,7 @@ suspend fun getPostForUser(email : String): List<Post>{
     return posts.find(Post::email eq email).toList()
 }
 suspend fun getPostFollowing(email: String): List<Post>? {
-    val followings = users.findOne(User::email eq email)?.followers ?: return null
+    val followings = users.findOne(User::email eq email)?.followings ?: return null
     return posts.find(Post::email `in` followings).toList()
 }
 suspend fun deletePost(idPost : String):Boolean{
@@ -89,7 +87,22 @@ suspend fun deleteTrading(idTrading : String):Boolean{
     val trading = tradings.findOne(Trading::_id eq idTrading) ?: return false
     return tradings.deleteOneById(trading._id).wasAcknowledged()
 }
-
+suspend fun isMemberCommentOfPost(idPost:String,email:String):Boolean{
+     val post = posts.findOneById(idPost) ?: return false
+    return email in post.memberCommentList
+}
+suspend fun saveCommentPost(commentPost: CommentPost) : Boolean{
+    val idComment = commentPost._id
+    val idPost = commentPost.postId
+    val email = commentPost.idUser
+    commentPosts.insertOne(commentPost).wasAcknowledged()
+    if (!isMemberCommentOfPost(idPost, email)) {
+        val member = posts.findOneById(idPost)?.memberCommentList ?: return false
+        posts.updateOneById(idPost, setValue(Post::memberCommentList, member + email)).wasAcknowledged()
+        }
+    val newComment = posts.findOne(Post::_id eq idPost)?.commentList ?: return false
+    return posts.updateOneById(idPost, setValue(Post::commentList, newComment + idComment)).wasAcknowledged()
+}
 
 
 

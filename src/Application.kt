@@ -32,6 +32,7 @@ fun Application.module(testing: Boolean = false) {
         pestaRoute()
         postRoute()
         tradingRoute()
+        commentRoute()
     }
 }
 private fun Authentication.Configuration.configureAuth(){

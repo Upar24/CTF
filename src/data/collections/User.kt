@@ -8,6 +8,7 @@ data class User(
     val password : String,
     val username : String = "",
     val followers : List<String> = listOf(),
+    val followings : List<String> = listOf(),
     @BsonId
     val _id : String = ObjectId().toString()
 )
