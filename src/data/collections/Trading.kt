@@ -12,8 +12,8 @@ data class Trading(
     val buying : String,
     val amountSelling : String,
     val amountBuying : String,
-    val comment : List<String> = listOf(),
-    val memberComment : List<String> = listOf(),
+    val commentList : List<String> = listOf("="),
+    val memberCommentList : List<String> = listOf(email),
     val likedBy: List<String> = listOf(),
     val dislikedBy: List<String> = listOf()
 )

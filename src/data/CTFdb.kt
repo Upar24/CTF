@@ -12,7 +12,8 @@ private val pestas = db.getCollection<Pesta>("pesta")
 private val sudahs = db.getCollection<Sudah>("sudah")
 private val posts = db.getCollection<Post>("post")
 private val tradings = db.getCollection<Trading>("trading")
-private val commentPosts = db.getCollection<CommentPost>("commentPost")
+private val commentPosts = db.getCollection<Comment>("commentPost")
+private val commentTradings = db.getCollection<Comment>("commentTrading")
 
 suspend fun registerUser(user: User) : Boolean{
     return users.insertOne(user).wasAcknowledged()
@@ -87,21 +88,33 @@ suspend fun deleteTrading(idTrading : String):Boolean{
     val trading = tradings.findOne(Trading::_id eq idTrading) ?: return false
     return tradings.deleteOneById(trading._id).wasAcknowledged()
 }
-suspend fun isMemberCommentOfPost(idPost:String,email:String):Boolean{
-     val post = posts.findOneById(idPost) ?: return false
+suspend fun isMemberCommentOfPostOrTrading(idPostOrTrading:String,email:String):Boolean{
+     val post = posts.findOneById(idPostOrTrading) ?: return false
     return email in post.memberCommentList
 }
-suspend fun saveCommentPost(commentPost: CommentPost) : Boolean{
+suspend fun saveCommentPost(commentPost: Comment) : Boolean{
     val idComment = commentPost._id
-    val idPost = commentPost.postId
+    val idPost = commentPost.postingId
     val email = commentPost.idUser
     commentPosts.insertOne(commentPost).wasAcknowledged()
-    if (!isMemberCommentOfPost(idPost, email)) {
+    if (!isMemberCommentOfPostOrTrading(idPost, email)) {
         val member = posts.findOneById(idPost)?.memberCommentList ?: return false
         posts.updateOneById(idPost, setValue(Post::memberCommentList, member + email)).wasAcknowledged()
         }
     val newComment = posts.findOne(Post::_id eq idPost)?.commentList ?: return false
     return posts.updateOneById(idPost, setValue(Post::commentList, newComment + idComment)).wasAcknowledged()
+}
+suspend fun saveCommentTrading(commentTrading: Comment) : Boolean{
+    val idComment = commentTrading._id
+    val idTrading = commentTrading.postingId
+    val email = commentTrading.idUser
+    commentTradings.insertOne(commentTrading).wasAcknowledged()
+    if (!isMemberCommentOfPostOrTrading(idTrading, email)) {
+        val member = tradings.findOneById(idTrading)?.memberCommentList ?: return false
+        tradings.updateOneById(idTrading, setValue(Trading::memberCommentList, member + email)).wasAcknowledged()
+    }
+    val newComment = tradings.findOne(Trading::_id eq idTrading)?.commentList ?: return false
+    return tradings.updateOneById(idTrading, setValue(Trading::commentList, newComment + idComment)).wasAcknowledged()
 }
 
 
