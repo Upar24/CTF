@@ -2,12 +2,15 @@ package com.project.routes
 
 import com.project.data.collections.CommentPost
 import com.project.data.deleteCommentPost
-import com.project.data.outFromMemberCommentOfTrading
+import com.project.data.getCommentPost
+import com.project.data.outFromMemberCommentPost
 import com.project.data.reponses.SimpleResponse
 import com.project.data.requests.DeleteRequest
+import com.project.data.requests.SearchRequest
 import com.project.data.saveCommentPost
 import io.ktor.application.*
 import io.ktor.auth.*
+import io.ktor.http.HttpStatusCode.Companion.BadRequest
 import io.ktor.http.HttpStatusCode.Companion.Conflict
 import io.ktor.http.HttpStatusCode.Companion.OK
 import io.ktor.request.*
@@ -52,11 +55,25 @@ fun Route.commentPostRoute(){
                     return@get
                 }
                 val email = call.principal<UserIdPrincipal>()!!.name
-                if(outFromMemberCommentOfTrading(maybelmao.idDelete,email)){
+                if(outFromMemberCommentPost(maybelmao.idDelete,email)){
                     call.respond(OK,SimpleResponse(true,"you are not getting notif again"))
                 }else{
                     call.respond(OK,SimpleResponse(false,"you are not a member anylonger"))
                 }
+            }
+        }
+    }
+    route("/getcommentpost"){
+        authenticate {
+            get {
+                val comment =try {
+                    call.receive<SearchRequest>()
+                }catch (e:ContentTransformationException){
+                    call.respond(BadRequest)
+                    return@get
+                }
+                val comments = getCommentPost(comment.search)
+                call.respond(OK,comments)
             }
         }
     }

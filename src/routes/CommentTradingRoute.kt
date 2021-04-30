@@ -1,15 +1,14 @@
 package com.project.routes
 
+import com.project.data.*
 import com.project.data.collections.CommentPost
 import com.project.data.collections.CommentTrading
-import com.project.data.deleteCommentPost
-import com.project.data.deleteCommentTrading
-import com.project.data.outFromMemberCommentOfTrading
 import com.project.data.reponses.SimpleResponse
 import com.project.data.requests.DeleteRequest
-import com.project.data.saveCommentTrading
+import com.project.data.requests.SearchRequest
 import io.ktor.application.*
 import io.ktor.auth.*
+import io.ktor.http.*
 import io.ktor.http.HttpStatusCode.Companion.Conflict
 import io.ktor.http.HttpStatusCode.Companion.OK
 import io.ktor.request.*
@@ -38,6 +37,20 @@ fun Route.commentTradingRoute(){
             }
         }
     }
+    route("/getcommenttrading"){
+        authenticate {
+            get {
+                val comment =try {
+                    call.receive<SearchRequest>()
+                }catch (e:ContentTransformationException){
+                    call.respond(HttpStatusCode.BadRequest)
+                    return@get
+                }
+                val comments = getCommentTrading(comment.search)
+                call.respond(OK,comments)
+            }
+        }
+    }
     route("/deletecommenttrading"){
         authenticate {
             post {
@@ -57,7 +70,7 @@ fun Route.commentTradingRoute(){
                     return@get
                 }
                 val email = call.principal<UserIdPrincipal>()!!.name
-                if(outFromMemberCommentOfTrading(maybelmao.idDelete,email)){
+                if(outFromMemberCommentTrading(maybelmao.idDelete,email)){
                     call.respond(OK,SimpleResponse(true,"you are not getting notif again"))
                 }else{
                     call.respond(OK,SimpleResponse(false,"you are not a member anylonger"))
