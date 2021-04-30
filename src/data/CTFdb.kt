@@ -2,8 +2,10 @@ package com.project.data
 
 import com.project.data.collections.*
 import org.litote.kmongo.*
+import org.litote.kmongo.coroutine.CoroutineFindPublisher
 import org.litote.kmongo.coroutine.coroutine
 import org.litote.kmongo.reactivestreams.KMongo
+import kotlin.reflect.KProperty0
 
 private val client = KMongo.createClient().coroutine
 private val db = client.getDatabase("CTFDb")
@@ -12,8 +14,8 @@ private val pestas = db.getCollection<Pesta>("pesta")
 private val sudahs = db.getCollection<Sudah>("sudah")
 private val posts = db.getCollection<Post>("post")
 private val tradings = db.getCollection<Trading>("trading")
-private val commentPosts = db.getCollection<Comment>("commentPost")
-private val commentTradings = db.getCollection<Comment>("commentTrading")
+private val commentPosts = db.getCollection<CommentPost>("commentPost")
+private val commentTradings = db.getCollection<CommentTrading>("commentTrading")
 
 suspend fun registerUser(user: User) : Boolean{
     return users.insertOne(user).wasAcknowledged()
@@ -70,6 +72,7 @@ suspend fun getPostFollowing(email: String): List<Post>? {
 }
 suspend fun deletePost(idPost : String):Boolean{
     val post = posts.findOne(Post::_id eq idPost) ?: return false
+    deleteAllCommentCosPostDeleted(post._id)
     return posts.deleteOneById(post._id).wasAcknowledged()
 }
 suspend fun saveTrading(trading: Trading):Boolean{
@@ -86,15 +89,23 @@ suspend fun getSelling(query: String):List<Trading>{
 }
 suspend fun deleteTrading(idTrading : String):Boolean{
     val trading = tradings.findOne(Trading::_id eq idTrading) ?: return false
+    deleteAllCommentCosTradingDeleted(trading._id)
     return tradings.deleteOneById(trading._id).wasAcknowledged()
 }
 suspend fun isMemberCommentOfPostOrTrading(idPostOrTrading:String,email:String):Boolean{
      val post = posts.findOneById(idPostOrTrading) ?: return false
     return email in post.memberCommentList
 }
-suspend fun saveCommentPost(commentPost: Comment) : Boolean{
+suspend fun outFromMemberCommentOfTrading(idPostOrTrading: String,email: String):Boolean{
+    return if(isMemberCommentOfPostOrTrading(idPostOrTrading,email)){
+        val post = posts.findOneById(idPostOrTrading) ?: return false
+        val newMember = post.memberCommentList - email
+        return posts.updateOne(Post::_id eq post._id, setValue(Post::memberCommentList,newMember)).wasAcknowledged()
+        } else false
+}
+suspend fun saveCommentPost(commentPost: CommentPost) : Boolean{
     val idComment = commentPost._id
-    val idPost = commentPost.postingId
+    val idPost = commentPost.postId
     val email = commentPost.idUser
     commentPosts.insertOne(commentPost).wasAcknowledged()
     if (!isMemberCommentOfPostOrTrading(idPost, email)) {
@@ -104,9 +115,9 @@ suspend fun saveCommentPost(commentPost: Comment) : Boolean{
     val newComment = posts.findOne(Post::_id eq idPost)?.commentList ?: return false
     return posts.updateOneById(idPost, setValue(Post::commentList, newComment + idComment)).wasAcknowledged()
 }
-suspend fun saveCommentTrading(commentTrading: Comment) : Boolean{
+suspend fun saveCommentTrading(commentTrading: CommentTrading) : Boolean{
     val idComment = commentTrading._id
-    val idTrading = commentTrading.postingId
+    val idTrading = commentTrading.tradingId
     val email = commentTrading.idUser
     commentTradings.insertOne(commentTrading).wasAcknowledged()
     if (!isMemberCommentOfPostOrTrading(idTrading, email)) {
@@ -116,7 +127,20 @@ suspend fun saveCommentTrading(commentTrading: Comment) : Boolean{
     val newComment = tradings.findOne(Trading::_id eq idTrading)?.commentList ?: return false
     return tradings.updateOneById(idTrading, setValue(Trading::commentList, newComment + idComment)).wasAcknowledged()
 }
-
+suspend fun deleteCommentPost(idComment:String):Boolean{
+    val comment = commentPosts.findOne(CommentPost::_id eq idComment) ?: return false
+    return commentPosts.deleteOneById(comment._id).wasAcknowledged()
+}
+suspend fun deleteCommentTrading(idComment : String):Boolean{
+    val comment = commentTradings.findOne(CommentTrading::_id eq idComment) ?: return false
+   return commentTradings.deleteOneById(comment._id).wasAcknowledged()
+}
+suspend fun deleteAllCommentCosPostDeleted(idPost:String):Boolean{
+    return commentPosts.deleteMany(CommentPost::postId eq idPost).wasAcknowledged()
+}
+suspend fun deleteAllCommentCosTradingDeleted(idTrading: String):Boolean{
+    return commentTradings.deleteMany(CommentTrading::tradingId eq idTrading).wasAcknowledged()
+}
 
 
 

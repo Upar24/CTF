@@ -39,7 +39,7 @@ fun Route.postRoute() {
                 val post = try{
                     call.receive<DeleteRequest>()
                 }catch (e : ContentTransformationException){
-                    call.respond(OK,SimpleResponse(true,"post deleted"))
+                    call.respond(OK,SimpleResponse(false,"dont know wtf happen"))
                     return@post
                 }
                 if(deletePost(post.idDelete)) call.respond(OK) else call.respond(Conflict)

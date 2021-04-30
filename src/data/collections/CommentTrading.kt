@@ -1,8 +1,8 @@
 package com.project.data.collections
 
-data class Comment(
+data class CommentTrading(
     val _id : String,
-    val postingId : String,
+    val tradingId : String,
     val idUser : String,
     val commentText : String,
     val date : Long
