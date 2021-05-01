@@ -1,11 +1,10 @@
 package com.project.data
 
+import com.mongodb.client.model.CreateCollectionOptions
 import com.project.data.collections.*
 import org.litote.kmongo.*
-import org.litote.kmongo.coroutine.CoroutineFindPublisher
 import org.litote.kmongo.coroutine.coroutine
 import org.litote.kmongo.reactivestreams.KMongo
-import kotlin.reflect.KProperty0
 
 private val client = KMongo.createClient().coroutine
 private val db = client.getDatabase("CTFDb")
@@ -16,6 +15,7 @@ private val posts = db.getCollection<Post>("post")
 private val tradings = db.getCollection<Trading>("trading")
 private val commentPosts = db.getCollection<CommentPost>("commentPost")
 private val commentTradings = db.getCollection<CommentTrading>("commentTrading")
+private val chats = db.getCollection<Chat>("chats")
 
 suspend fun registerUser(user: User) : Boolean{
     return users.insertOne(user).wasAcknowledged()
@@ -165,6 +165,19 @@ suspend fun deleteAllCommentCosPostDeleted(idPost:String):Boolean{
 }
 suspend fun deleteAllCommentCosTradingDeleted(idTrading: String):Boolean{
     return commentTradings.deleteMany(CommentTrading::tradingId eq idTrading).wasAcknowledged()
+}
+suspend fun maxDocumentChat(){
+    val size = chats.find().toList().size
+    if(size > 5){
+        chats.deleteOne()
+    }
+}
+suspend fun saveChat(chat:Chat):Boolean{
+    return chats.insertOne(chat).wasAcknowledged()
+}
+suspend fun getChat():List<Chat>{
+    maxDocumentChat()
+    return chats.find().toList()
 }
 
 

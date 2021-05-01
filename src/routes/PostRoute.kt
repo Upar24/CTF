@@ -9,6 +9,7 @@ import com.project.data.requests.DeleteRequest
 import com.project.data.savePost
 import io.ktor.application.*
 import io.ktor.auth.*
+import io.ktor.http.HttpStatusCode.Companion.BadRequest
 import io.ktor.http.HttpStatusCode.Companion.Conflict
 import io.ktor.http.HttpStatusCode.Companion.OK
 import io.ktor.request.*
@@ -28,7 +29,7 @@ fun Route.postRoute() {
                 if(savePost(Post(post._id,post.email,post.date,post.text))){
                     call.respond(OK)
                 }else{
-                    call.respond(Conflict)
+                    call.respond(BadRequest)
                 }
             }
         }

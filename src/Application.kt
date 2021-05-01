@@ -34,6 +34,7 @@ fun Application.module(testing: Boolean = false) {
         tradingRoute()
         commentPostRoute()
         commentTradingRoute()
+        chatRoute()
     }
 }
 private fun Authentication.Configuration.configureAuth(){
